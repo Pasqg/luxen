@@ -32,4 +32,4 @@ Another alternative is to run:
 
 ## License
 
-Copyright © 2021 Pasquale Giovenale
+This project is licensed under [Apache License, Version 2.0](LICENSE)

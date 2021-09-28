@@ -13,6 +13,8 @@
 (defn json-response [data]
   (content-type {:body (generate-string data)} "application/json"))
 
+(defn status-response [status] (json-response {:status status}))
+
 ;todo: add proper exception handling to avoid random http errors
 (defroutes luxen-routes
            (GET "/api/docs" [] "Api docs")
@@ -23,6 +25,17 @@
              (json-response (get-issue project-id issue-id)))
            (GET "/issue/:issue-id" [issue-id]
              (json-response (get-issue issue-id)))
+           (GET "/issues/:project-id" [project-id]
+             (json-response (get-issues-for-project project-id)))
+
+           (GET "/project/create/:project-id" [project-id]
+             (if (pos? (first (create-first-issue-for-project project-id)))
+               (status-response "OK")
+               (status-response "ERROR")))
+           (GET "/issue/create/:project-id/:title/:description" [project-id title description]
+             (if (pos? (first (create-issue project-id title description)))
+               (status-response "OK")
+               (status-response "ERROR")))
            )
 
 (def luxen-server-config (wrap-defaults luxen-routes site-defaults))

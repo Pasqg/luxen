@@ -5,6 +5,7 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [compojure "1.6.1"]
                  [ring/ring-defaults "0.3.2"]
+                 [ring-cors/ring-cors "0.1.13"]
                  [ring/ring-jetty-adapter "1.3.1"]
                  [org.clojure/java.jdbc "0.7.12"]
                  [mysql/mysql-connector-java "5.1.49"]

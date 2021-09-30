@@ -3,6 +3,7 @@
             [compojure.route :as route]
             [clojure.string]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.cors :refer [wrap-cors]]
             [ring.util.response :refer :all]
             [cheshire.core :refer :all])
   (:use luxen-server.luxen-data)
@@ -38,4 +39,7 @@
                (status-response "ERROR")))
            )
 
-(def luxen-server-config (wrap-defaults luxen-routes site-defaults))
+(def luxen-server-config (-> luxen-routes
+                             (wrap-defaults site-defaults)
+                             (wrap-cors :access-control-allow-origin [#".*"]
+                                        :access-control-allow-methods [:get])))

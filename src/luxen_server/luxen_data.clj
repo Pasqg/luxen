@@ -16,11 +16,11 @@
          :password    mysql-password})
 
 (defn get-issues-for-project [project-id]
-  (jdbc/query db (str "select * from issues where project_id = '" project-id "'")))
+  (jdbc/query db (str "select * from issues where project_id = '" project-id "' order by id desc")))
 
 (defn get-issue
   ([project-id issue-id]
-   (jdbc/query db (str "select * from issues where id = " issue-id " and project_id = '" project-id "'")))
+   (jdbc/query db (str "select * from issues where id = " issue-id " and project_id = '" project-id "' order by id desc" )))
   ([issue-id]
    (let [split (clojure.string/split issue-id #"-")]
      (get-issue (first split) (second split))))

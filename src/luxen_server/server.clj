@@ -28,6 +28,14 @@
              (json-response (get-issue issue-id)))
            (GET "/issues/:project-id" [project-id]
              (json-response (get-issues-for-project project-id)))
+           (GET "/all-issues/:limit" [limit]
+             (json-response (get-n-issues limit)))
+           (GET "/all-issues" []
+             (json-response (get-n-issues 1000)))
+           (GET "/open-issues/:limit" [limit]
+             (json-response (get-open-issues limit)))
+           (GET "/projects" []
+             (json-response (get-projects)))
 
            (GET "/project/create/:project-id" [project-id]
              (if (pos? (first (create-first-issue-for-project project-id)))

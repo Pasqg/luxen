@@ -18,6 +18,15 @@
 (defn get-issues-for-project [project-id]
   (jdbc/query db (str "select * from issues where project_id = '" project-id "' order by id desc")))
 
+(defn get-n-issues [n]
+  (jdbc/query db (str "select * from issues order by id desc limit " n)))
+
+(defn get-open-issues [n]
+  (jdbc/query db (str "select * from issues where status <> 'Done' order by id desc limit " n)))
+
+(defn get-projects []
+  (jdbc/query db (str "select distinct project_id from issues")))
+
 (defn get-issue
   ([project-id issue-id]
    (jdbc/query db (str "select * from issues where id = " issue-id " and project_id = '" project-id "' order by id desc" )))

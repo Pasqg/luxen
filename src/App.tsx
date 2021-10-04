@@ -134,8 +134,6 @@ class MainPage extends React.Component<{}, {
     }
 
     render(): JSX.Element {
-        // @ts-ignore
-        // @ts-ignore
         return <ThemeProvider theme={newTheme}>
             <AppBar position="static" color="secondary">
                 <Toolbar variant="dense" sx={{display: "flex", justifyContent: "space-between"}}>

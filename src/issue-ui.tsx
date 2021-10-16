@@ -124,7 +124,7 @@ export class IssueCreationDialog
                 </Box>
                 <Divider/>
                 <TextField margin="dense" id="description" label="Description" type="text" fullWidth multiline variant="standard"
-                           minRows={3}
+                           minRows={3} inputProps={{maxLength: 1024}}
                            onChange={(value) => this.setState({description: value.target.value})}/>
             </DialogContent>
             <DialogActions>

@@ -29,7 +29,7 @@
 
 (defn get-issue
   ([project-id issue-id]
-   (jdbc/query db (str "select * from issues where id = " issue-id " and project_id = '" project-id "' order by id desc" )))
+   (jdbc/query db (str "select * from issues where id = " issue-id " and project_id = '" project-id "' order by id desc")))
   ([issue-id]
    (let [split (clojure.string/split issue-id #"-")]
      (get-issue (first split) (second split))))
@@ -46,6 +46,14 @@
           [0])))
   )
 
+(defn set-issue-status [project-id id status]
+  (try
+    (jdbc/execute! db (str "update issues set status = '" status "'"
+                           " where project_id='" project-id "' and id=" id))
+    (catch Exception exception
+      (do (println (.getMessage exception))
+          [0])))
+  )
 
 (defn create-first-issue-for-project [project-id]
   (jdbc/execute! db (str "insert into issues (id, project_id, title, description, status)"

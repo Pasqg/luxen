@@ -45,6 +45,10 @@
              (if (pos? (first (create-issue project-id title description)))
                (status-response "OK")
                (status-response "ERROR")))
+           (GET "/issue/setStatus/:project-id/:id/:status" [project-id id status]
+             (if (pos? (first (set-issue-status project-id id status)))
+               (status-response "OK")
+               (status-response "ERROR")))
            )
 
 (def luxen-server-config (-> luxen-routes

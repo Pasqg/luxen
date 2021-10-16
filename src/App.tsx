@@ -1,27 +1,13 @@
 import React, {ReactElement} from "react";
 import "./App.css";
 import {createTheme} from "@mui/material/styles";
-import {
-    Alert,
-    AlertColor,
-    AppBar,
-    Box,
-    Button,
-    ButtonGroup,
-    Card,
-    CardContent, Divider,
-    IconButton,
-    List,
-    ListItemButton, ListItemText, Snackbar, Stack,
-    ThemeProvider,
-    Toolbar,
-    Typography,
-} from "@mui/material";
+import {AppBar, Box, Button, Divider, IconButton, Snackbar, ThemeProvider, Toolbar} from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {fetchIssues} from "./server-api";
-import {IssueCreationDialog, IssueList} from "./issue-ui";
+import {IssueCreationDialog, IssueList, IssuePanel} from "./issue-ui";
 import {Runnable} from "./utils";
 import {closeableAlert} from "./ui-utils";
+import {Issue} from "./datamodel";
 
 const newTheme = createTheme({
     status: {
@@ -130,7 +116,24 @@ class MainPage extends React.Component<{}, {
     }
 
     private setCurrentAlert(alert: JSX.Element | undefined) {
-        this.setState({currentAlert: alert, snackBarOpen: alert != undefined});
+        this.setState({currentAlert: alert, snackBarOpen: alert !== undefined});
+    }
+
+    private issueList(issues: Array<Issue>, selectedIssue: Issue | null): void {
+        //todo: has to become IssueView
+        this.setCurrentView(<Box sx={{display: "flex", justifyContent: "space-between"}}>
+            <IssueList issues={issues} onIssueClick={issue => this.issueList(issues, issue)}/>
+            <Divider orientation="vertical" flexItem/>
+            {selectedIssue
+                ? <IssuePanel issue={selectedIssue} onChange={updatedIssue => {
+                    const updatedIssues: Array<Issue> = issues.map(issue =>
+                        issue.project_id === updatedIssue.project_id && issue.id === updatedIssue.id
+                            ? updatedIssue
+                            : issue);
+                    this.issueList(updatedIssues, updatedIssue);
+                }}/>
+                : <Box sx={{flexGrow: 5}}/>}
+        </Box>);
     }
 
     render(): JSX.Element {
@@ -141,10 +144,10 @@ class MainPage extends React.Component<{}, {
                         <TopBarButton caption="Projects" onClick={() => {
                         }}/>
                         <TopBarButton caption="All issues" onClick={() => {
-                            fetchIssues(issues => this.setCurrentView(<IssueList issues={issues}/>), 10, false);
+                            fetchIssues(issues => this.issueList(issues, null), 10, false);
                         }}/>
                         <TopBarButton caption="Open issues" onClick={() => {
-                            fetchIssues(issues => this.setCurrentView(<IssueList issues={issues}/>), 10, true);
+                            fetchIssues(issues => this.issueList(issues, null), 10, true);
                         }}/>
                         <Button variant="contained" color="primary"
                                 component="div" disableElevation sx={{mr: 2}}

@@ -2,10 +2,9 @@ import React from "react";
 import {
     Box,
     Button,
-    Card,
-    CardContent, Chip,
+    Chip,
     Dialog, DialogActions,
-    DialogContent, DialogContentText,
+    DialogContent,
     DialogTitle,
     Divider,
     List,
@@ -13,24 +12,59 @@ import {
     ListItemText, TextField,
     Typography,
 } from "@mui/material";
-import {Issue, newIssue} from "./datamodel";
+import {Issue, issueWithStatus, newIssue} from "./datamodel";
 import {Runnable} from "./utils";
 import {OverridableStringUnion} from "@mui/types";
 import {ChipPropsColorOverrides} from "@mui/material/Chip/Chip";
-import {createIssue} from "./server-api";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import {createIssue, setIssueStatus} from "./server-api";
 
-export class IssuePanel extends React.Component<Issue> {
+type IssuePanelProp = { issue: Issue, onChange: (issue: Issue) => void }
+
+//TextField default value is not used when calculating dom difference, so when we click another issue
+//it looks like the text field hasn't changed (even though default value changed). For this reason
+//we need to modify anothger property as well. In this case "key"
+//Apparently this could cause leaking memory? Better to keep an eye on it
+export class IssuePanel extends React.Component<IssuePanelProp> {
+
+    private setIssueStatus(status: string): void {
+        let updatedIssue: Issue = issueWithStatus(this.props.issue, status);
+        setIssueStatus(updatedIssue,
+            () => {
+                this.setState({issueStatus: status});
+                this.forceUpdate();
+            },
+            () => alert("Failed to update issue"));
+        this.props.onChange(updatedIssue);
+    }
+
     render() {
-        return <Card sx={{display: "flex", flexDirection: "column", flexGrow: 6}}>
-            <CardContent>
-                <Typography color="primary" variant="h4" component="div">Add web server component</Typography>
-                <Typography paragraph>Description...</Typography>
-            </CardContent>
-        </Card>;
+        return <Box sx={{flexGrow: 5, margin: 2}}>
+            <Chip label={this.props.issue.status} color={statusColor(this.props.issue.status)} sx={{margin: 2, marginTop: 0}}/>
+            <Typography variant="h4" color="primary" sx={{display: "inline"}}>
+                {this.props.issue.project_id + "-" + this.props.issue.id}
+            </Typography>
+            <ArrowRightIcon color="disabled"/>
+            <Typography variant="h4" color="primary" sx={{display: "inline"}}>{this.props.issue.title}</Typography>
+            <TextField key={this.props.issue.id} label="Description" fullWidth defaultValue={this.props.issue.description}
+                       multiline minRows={6} maxRows={10}
+                       sx={{display: "block", margin: 2, width: "50vw"}}/>
+            {this.props.issue.status === "Open"
+                ? <Button variant="contained" color="primary" sx={{margin: 2}}
+                          onClick={() => this.setIssueStatus("In progress")}>Start progress</Button>
+                : this.props.issue.status === "In progress"
+                    ? <Button variant="contained" color="primary" sx={{margin: 2}}
+                              onClick={() => this.setIssueStatus("Done")}>Close issue</Button>
+                    : null}
+            {this.props.issue.status !== "Open"
+                ? <Button variant="contained" color="primary" sx={{margin: 2}}
+                          onClick={() => this.setIssueStatus("Open")}>Re-open</Button>
+                : null}
+        </Box>;
     }
 }
 
-type IssueListProp = { issues: Array<Issue> };
+type IssueListProp = { issues: Array<Issue>, onIssueClick: (issue: Issue) => void };
 
 function statusColor(status: string): OverridableStringUnion<"default" | "primary" | "secondary" | "error" | "info" | "success" | "warning",
     ChipPropsColorOverrides> {
@@ -57,7 +91,7 @@ export class IssueList extends React.Component<IssueListProp> {
         return <Box sx={{display: "flex"}}>
             <List sx={{flexGrow: 1}}>
                 {this.props.issues.map((issue: Issue) => <>
-                        <ListItemButton component="div">
+                        <ListItemButton component="div" onClick={() => this.props.onIssueClick(issue)}>
                             <ListItemText primary={issue.project_id + "-" + issue.id} secondary={IssueList.truncate(issue.title, 24)}/>
                             <Chip label={issue.status} color={statusColor(issue.status)}/>
                         </ListItemButton>
@@ -91,15 +125,15 @@ export class IssueCreationDialog
                 <Divider/>
                 <TextField margin="dense" id="description" label="Description" type="text" fullWidth multiline variant="standard"
                            minRows={3}
-                    onChange={(value) => this.setState({description: value.target.value})}/>
+                           onChange={(value) => this.setState({description: value.target.value})}/>
             </DialogContent>
             <DialogActions>
                 <Button onClick={this.props.onClose}>Cancel</Button>
                 <Button color="primary" onClick={() => {
-                    this.props.onClose();
                     createIssue(newIssue(this.state.project, this.state.title, this.state.description),
-                        () => this.props.onSuccess(),
-                        () => this.props.onFailure());
+                        this.props.onSuccess,
+                        this.props.onFailure);
+                    this.props.onClose();
                 }}>Create</Button>
             </DialogActions>
         </Dialog>;

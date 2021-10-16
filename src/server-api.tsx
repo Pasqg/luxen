@@ -41,3 +41,22 @@ export async function createIssue(issue: Issue, onSuccess: Runnable, onFailure: 
         onFailure();
     });
 }
+
+export async function setIssueStatus(issue: Issue, onSuccess: Runnable, onFailure: Runnable): Promise<void> {
+    await fetch(protocol + "://" + host + ":" + port
+        + "/issue/setStatus/" + issue.project_id + "/" + encodeURIComponent(issue.id) + "/" + encodeURIComponent(issue.status), {
+        method: "GET",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-type": "application/json; charset=UTF-8",
+        },
+        body: null,
+    }).then(function (res) {
+        return res.json();
+    }).then(function () {
+        onSuccess();
+    }).catch((error) => {
+        console.log(error);
+        onFailure();
+    });
+}

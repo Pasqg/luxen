@@ -1,6 +1,7 @@
 (ns luxen-server.luxen-data
   (:require [clojure.java.jdbc :as jdbc]
-            clojure.string))
+            clojure.string
+            [clojure.tools.logging :as logger]))
 
 ;todo: move to configuration file
 (def mysql-host "localhost")
@@ -15,7 +16,7 @@
          :user        mysql-user
          :password    mysql-password})
 
-(defn get-issues-for-project [project-id]
+(defn get-issues-for-project [^String project-id]
   (jdbc/query db (str "select * from issues where project_id = '" project-id "' order by id desc")))
 
 (defn get-n-issues [n]
@@ -42,18 +43,14 @@
                            " from issues where project_id = '" project-id "'"
                            " order by id desc limit 1"))
     (catch Exception exception
-      (do (println (.getMessage exception))
-          [0])))
-  )
+      (do (logger/error "Exception when creating issue: " (.getMessage exception)) [0]))))
 
 (defn set-issue-status [project-id id status]
   (try
     (jdbc/execute! db (str "update issues set status = '" status "'"
                            " where project_id='" project-id "' and id=" id))
     (catch Exception exception
-      (do (println (.getMessage exception))
-          [0])))
-  )
+      (do (logger/error "Exception when changing issue status: " (.getMessage exception)) [0]))))
 
 (defn create-first-issue-for-project [project-id]
   (jdbc/execute! db (str "insert into issues (id, project_id, title, description, status)"

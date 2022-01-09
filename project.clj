@@ -10,6 +10,9 @@
                  [org.clojure/java.jdbc "0.7.12"]
                  [mysql/mysql-connector-java "5.1.49"]
                  [cheshire "5.10.0"]
+                 [org.clojure/tools.logging "1.2.4"]
+                 [org.slf4j/slf4j-api "1.7.32"]
+                 [ch.qos.logback/logback-classic "1.2.10"]
                  ]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler luxen-server.server/luxen-server-config}

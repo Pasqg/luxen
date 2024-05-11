@@ -18,10 +18,7 @@ Requirements:
 * `npm` package manager (or equivalent) to build and run the webgui.
 
 
-* MySQL with:
-
-    * "luxen_db" database
-    * "issues" table
+* MySQL
 
 ## Running Luxen
 
@@ -31,12 +28,22 @@ Before running Luxen server, you will need to start a MySql instance.
 
 For example with docker, using default image from MySql:
 
-    docker run --name mysql-luxen -p 3306:3306 -e MYSQL_ROOT_PASSWORD=luxenpassword -d mysql:latest
+    docker run --name mysql-luxen -p 3306:3306 -e MYSQL_ROOT_PASSWORD=<rootpassword> -d mysql:latest
+
+Set it up with:
+
+    CREATE DATABASE <db_name>;
+    USE <db_name>;
+    CREATE TABLE issues (
+        id INT NOT NULL,
+        project_id VARCHAR(8) NOT NULL,
+        title VARCHAR(96) DEFAULT 'New issue',
+        description TEXT DEFAULT (''),
+        status VARCHAR(16) DEFAULT 'Open');
 
 ### Luxen server
 
-To start the web server for the application for development, simply run
-server_runner.clj with intellij runner configuration.
+To start the web server for the application for development, simply run using server_runner.clj as entrypoint (main).
 
 Alternatively run:
 

@@ -49,6 +49,17 @@ Alternatively run:
 
     lein ring server
 
+The server will look for 'server.conf' file which should contain the following:
+
+    logger-level ROOT INFO
+    luxen-server-port <http-server-port>
+    mysql-host <host>
+    mysql-port <myseql-port>
+    mysql-database <d_name>
+    mysql-user <user>
+    mysql-password <password>
+
+
 ### Luxen web gui
 
 To start the web gui in development mode:

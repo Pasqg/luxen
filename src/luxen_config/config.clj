@@ -1,24 +1,21 @@
-(ns luxen-config.config
-  (:require [clojure.tools.logging :as logger])
-  (:import (ch.qos.logback.classic Level)
-           (ch.qos.logback.classic Logger)
-           (org.slf4j LoggerFactory)))
+(ns luxen-config.config)
 
 (defn tokenize [line]
   (clojure.string/split line #"[ \t\n\r]+"))
 
-(defmulti parse (fn [tokens] (first tokens)))
+(defn to-key-values [lines]
+  (map #(vector (keyword (first %1))
+                (cond
+                  (== 2 (count %1)) (second %1)
+                  :else (rest %1)))
+       lines))
 
-(defmethod parse "logger.level" [tokens]
-  (let [logger-name ^String (second tokens)
-        level (nth tokens 2)]
-    (.setLevel
-      ^Logger (cast Logger (LoggerFactory/getLogger logger-name))
-      (Level/valueOf level))
-    (logger/info "Read logger level " level " for " logger-name)))
 
-(defn read-config [file-name]
+(defn read-config-file [file-name]
   (as-> file-name x
         (slurp x)
         (clojure.string/split x #"\n")
-        (into {} (map #(-> %1 tokenize parse) x))))
+        (map tokenize x)
+        (to-key-values x)
+        (into {} x)))
+

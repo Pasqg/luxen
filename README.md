@@ -18,7 +18,12 @@ Requirements:
 * `npm` package manager (or equivalent) to build and run the webgui.
 
 
-* MySQL
+* A working `go` environment
+
+The entire project (server + webgui + cli) can be built by running the build script in [build.sh](build.sh) from the
+root directory.
+
+In alternative, each part can be built manually with lein, npm, go (see [build.sh](build.sh)).
 
 ## Running Luxen
 
@@ -58,7 +63,6 @@ The server will look for 'server.conf' file which should contain the following:
     mysql-database <d_name>
     mysql-user <user>
     mysql-password <password>
-
 
 ### Luxen web gui
 

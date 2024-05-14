@@ -1,13 +1,20 @@
 package cmd
 
 import (
+	"encoding/json"
     "io/ioutil"
 	"fmt"
 	"net/http"
+	"os"
     "strings"
 
 	"github.com/spf13/cobra"
 )
+
+func fileExists(String luxenFile) bool {
+    _, err := os.Stat(luxenFile);
+    return err == nil;
+}
 
 var serverUrl string
 
@@ -27,20 +34,52 @@ var initCmd = &cobra.Command{
 	    }
 	    projectName := args[0]
 
-        resp, err := http.Get("http://" + serverUrl + "/project/create/" + projectName)
+        response, err := http.Get("http://" + serverUrl + "/project/create/" + projectName)
         if err != nil {
             fmt.Println("Error:", err)
             return
         }
-        defer resp.Body.Close()
+        defer response.Body.Close()
 
-        body, err := ioutil.ReadAll(resp.Body)
+        body, err := ioutil.ReadAll(response.Body)
         if err != nil {
             fmt.Println("Error reading response body:", err)
             return
         }
 
-        fmt.Println("Response Body:", string(body))
+    	var result map[string]interface{}
+    	err = json.Unmarshal(body, &result)
+    	if err != nil {
+            fmt.Println("Error deserialising json response:", err)
+            return
+    	}
+
+        status := result["status"]
+    	if status != "OK" {
+            fmt.Println("Could not initialise project: ", status)
+            return
+    	}
+
+    	luxenFile := ".luxen"
+        if fileExists(luxenFile) {
+            fmt.Println("Current folder is already initialised.")
+            return
+        }
+
+    	file, err := os.Create(luxenFile)
+        if err != nil {
+            fmt.Println("Error:", err)
+            return
+        }
+        defer file.Close()
+
+        fileContent := "luxen-url " + serverUrl + "\nluxen-project " + projectName
+        _, err = file.WriteString(fileContent)
+        if err != nil {
+            fmt.Println("Error writing to file: ", err)
+            return
+        }
+        fmt.Println("Project " + projectName + " initialised.")
 	},
 
 }
